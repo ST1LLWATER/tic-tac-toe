@@ -1,41 +1,51 @@
 import React, { useCallback, useState } from "react";
 import Board from "./Components/Board";
+import History from "./Components/History";
+import StatusMessage from "./Components/StatusMessage";
 import calculateWinner from "./helper";
 
 import "./Styles/root.scss";
 
 function App() {
-  const [board, setBoard] = useState(Array(9).fill(null));
-  const [isXNext, setIsXNext] = useState(false);
+  const [history, setHistory] = useState([
+    { board: Array(9).fill(null), isXNext: true },
+  ]);
 
-  const winner = calculateWinner(board);
+  const [currentMove, setCurrentMove] = useState(0);
 
-  const message = winner
-    ? `Winner Is  ${winner}`
-    : `Next Player To Mark: ${isXNext ? "X" : "O"}`;
+  const current = history[currentMove];
+
+  const winner = calculateWinner(current.board);
 
   const handleSquareClick = (position) => {
-    if (board[position] || winner) {
+    if (current.board[position] || winner) {
       return;
     }
 
-    setBoard((prev) => {
-      return prev.map((square, pos) => {
+    setHistory((prev) => {
+      const last = prev[prev.length - 1];
+
+      const newBoard = last.board.map((square, pos) => {
         if (pos === position) {
-          return isXNext ? "X" : "O";
-        } else {
-          return square;
+          return last.isXNext ? "X" : "O";
         }
+        return square;
       });
+      return prev.concat({ board: newBoard, isXNext: !last.isXNext });
     });
-    setIsXNext(!isXNext);
+    setCurrentMove((prev) => prev + 1);
+  };
+
+  const moveTo = (move) => {
+    setCurrentMove(move);
   };
 
   return (
     <div className="app">
-      <h1>Tic Tac Toe</h1>
-      <h1>{message}</h1>
-      <Board board={board} handleSquareClick={handleSquareClick} />
+      <h1 className="title">TIC TAC TOE</h1>
+      <StatusMessage winner={winner} current={current} />
+      <Board board={current.board} handleSquareClick={handleSquareClick} />
+      <History history={history} moveTo={moveTo} currentMove={currentMove} />
     </div>
   );
 }
