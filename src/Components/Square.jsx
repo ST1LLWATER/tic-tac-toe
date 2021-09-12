@@ -4,9 +4,10 @@ const Square = (props) => {
   return (
     <button
       type="button"
-      className="square"
       onClick={props.onClick}
-      style={{ fontWeight: props.isWinningSquare ? "bold" : "normal" }}
+      className={`square ${props.isWinningSquare ? "winning" : ""} ${
+        props.value === "X" ? "text-green" : "text-orange"
+      }`}
     >
       {props.value}
     </button>
